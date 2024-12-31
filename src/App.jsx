@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { AppShell, Button, Textarea, Checkbox, Paper, Text } from '@mantine/core'
+import { AppShell, Button, Textarea, Checkbox, Paper, Text, ActionIcon } from '@mantine/core'
+import { IconCopy } from '@tabler/icons-react'
 import { Sidebar } from './components/Sidebar'
 import { processors } from './processors'
 import './App.css'
@@ -9,12 +10,20 @@ function App() {
   const [outputText, setOutputText] = useState('')
   const [selectedProcessor, setSelectedProcessor] = useState('uppercase')
   const [autoProcess, setAutoProcess] = useState(false)
+  const [showCopy, setShowCopy] = useState(false)
+  const [isError, setIsError] = useState(false)
 
   const handleProcess = () => {
     const processor = processors[selectedProcessor]
     if (processor) {
-      setOutputText(processor.process(inputText))
+      const result = processor.process(inputText)
+      setOutputText(result)
+      setIsError(result.startsWith('Error:'))
     }
+  }
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(outputText)
   }
 
   useEffect(() => {
@@ -63,9 +72,7 @@ function App() {
             <Text size="xl" weight={500} style={{ marginBottom: '10px' }}>
               {processors[selectedProcessor].name}
             </Text>
-            <Text>
-              {processors[selectedProcessor].description}
-            </Text>
+            <Text dangerouslySetInnerHTML={{ __html: processors[selectedProcessor].description }} />
           </Paper>
 
           <div style={{ 
@@ -103,16 +110,42 @@ function App() {
               </Button>
             </div>
 
-            <Textarea
-              placeholder="Output will appear here..."
-              value={outputText}
-              readOnly
-              styles={{
-                root: { flex: 1, minWidth: '300px' },
-                wrapper: { height: '100%' },
-                input: { height: '100%', minHeight: '100%' }
-              }}
-            />
+            <div 
+              style={{ position: 'relative', flex: 1, minWidth: '300px' }}
+              onMouseEnter={() => setShowCopy(true)}
+              onMouseLeave={() => setShowCopy(false)}
+            >
+              {showCopy && outputText && (
+                <ActionIcon
+                  variant="filled"
+                  color="blue"
+                  onClick={handleCopy}
+                  style={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    zIndex: 1000,
+                    backgroundColor: 'rgba(51, 154, 240, 0.9)'
+                  }}
+                >
+                  <IconCopy size={16} />
+                </ActionIcon>
+              )}
+              <Textarea
+                placeholder="Output will appear here..."
+                value={outputText}
+                readOnly
+                styles={{
+                  root: { height: '100%' },
+                  wrapper: { height: '100%' },
+                  input: { 
+                    height: '100%', 
+                    minHeight: '100%',
+                    color: isError ? '#e03131' : 'inherit'
+                  }
+                }}
+              />
+            </div>
           </div>
         </div>
       </AppShell.Main>
