@@ -26,35 +26,60 @@ export const jsonMinify = {
 
 export const xmlFormat = {
   name: 'XML 格式化',
-  description: '格式化XML文本，添加适当的缩进和换行。<br/>例如：<span style="color: #666">&lt;root&gt;&lt;person&gt;&lt;name&gt;John&lt;/name&gt;&lt;/person&gt;&lt;/root&gt;</span><br/>→ <span style="color: #2f9e44">&lt;root&gt;\n&nbsp;&nbsp;&lt;person&gt;\n&nbsp;&nbsp;&nbsp;&nbsp;&lt;name&gt;John&lt;/name&gt;\n&nbsp;&nbsp;&lt;/person&gt;\n&lt;/root&gt;</span>',
+  description: '格式化XML文本，添加适当的缩进和换行。<br/>例如：<span style="color: #666">&lt;root&gt;&lt;person&gt;&lt;name&gt;John&lt;/name&gt;&lt;/person&gt;&lt;/root&gt;</span> → <span style="color: #2f9e44">&lt;root&gt;\n&nbsp;&nbsp;&lt;person&gt;\n&nbsp;&nbsp;&nbsp;&nbsp;&lt;name&gt;John&lt;/name&gt;\n&nbsp;&nbsp;&lt;/person&gt;\n&lt;/root&gt;</span>',
   process: (text) => {
     try {
-      // Create a temporary DOM parser
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(text, 'text/xml');
-      
-      // Check for parsing errors
-      const parserError = xmlDoc.getElementsByTagName('parsererror');
-      if (parserError.length > 0) {
-        throw new Error('Invalid XML');
-      }
+      // First, minify the XML to normalize it
+      let formatted = text.replace(/>\s+</g, '><')
+                         .replace(/\s+</g, '<')
+                         .replace(/>\s+/g, '>')
+                         .trim();
 
-      // Format the XML with proper indentation
-      const serializer = new XMLSerializer();
-      let formatted = '';
-      const split = serializer.serializeToString(xmlDoc).split('>');
+      // Add newlines and indentation
+      let output = '';
       let indent = 0;
+      let inTag = false;
+      let inContent = false;
       
-      for (let i = 0; i < split.length; i++) {
-        const node = split[i];
-        if (node.trim() !== '') {
-          if (node.indexOf('</') === 0) indent--;
-          formatted += '  '.repeat(indent) + node.trim() + '>\n';
-          if (node.indexOf('/>') === -1 && node.indexOf('</') === -1 && node.indexOf('<?xml') === -1) indent++;
+      for (let i = 0; i < formatted.length; i++) {
+        const char = formatted[i];
+        
+        if (char === '<') {
+          const isClosing = formatted[i + 1] === '/';
+          if (isClosing) {
+            indent--;
+          }
+          
+          if (inContent) {
+            output += '\n' + '  '.repeat(indent);
+            inContent = false;
+          }
+          
+          inTag = true;
+          output += char;
+        } else if (char === '>') {
+          inTag = false;
+          output += char;
+          
+          const isClosing = formatted[i - 1] === '/';
+          const nextChar = formatted[i + 1];
+          
+          if (!isClosing && formatted[i - 1] !== '/' && nextChar !== '<') {
+            inContent = true;
+          } else if (!isClosing && nextChar === '<' && formatted[i + 2] !== '/') {
+            output += '\n' + '  '.repeat(indent + 1);
+            indent++;
+          } else if (nextChar === '<' && formatted[i + 2] === '/') {
+            output += '\n' + '  '.repeat(indent);
+          } else if (nextChar === '<') {
+            output += '\n' + '  '.repeat(indent);
+          }
+        } else {
+          output += char;
         }
       }
       
-      return formatted.trim();
+      return output;
     } catch (e) {
       return 'Error: Invalid XML input';
     }
@@ -63,23 +88,21 @@ export const xmlFormat = {
 
 export const xmlMinify = {
   name: 'XML 压缩',
-  description: '移除XML文本中的所有空格、缩进和换行，将其压缩为一行。<br/>例如：<span style="color: #666">&lt;root&gt;\n&nbsp;&nbsp;&lt;person&gt;\n&nbsp;&nbsp;&nbsp;&nbsp;&lt;name&gt;John&lt;/name&gt;\n&nbsp;&nbsp;&lt;/person&gt;\n&lt;/root&gt;</span><br/>→ <span style="color: #2f9e44">&lt;root&gt;&lt;person&gt;&lt;name&gt;John&lt;/name&gt;&lt;/person&gt;&lt;/root&gt;</span>',
+  description: '移除XML文本中的所有空格、缩进和换行，将其压缩为一行。<br/>例如：<span style="color: #666">&lt;root&gt;\n&nbsp;&nbsp;&lt;person&gt;\n&nbsp;&nbsp;&nbsp;&nbsp;&lt;name&gt;John&lt;/name&gt;\n&nbsp;&nbsp;&lt;/person&gt;\n&lt;/root&gt;</span> → <span style="color: #2f9e44">&lt;root&gt;&lt;person&gt;&lt;name&gt;John&lt;/name&gt;&lt;/person&gt;&lt;/root&gt;</span>',
   process: (text) => {
     try {
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(text, 'text/xml');
       
-      // Check for parsing errors
       const parserError = xmlDoc.getElementsByTagName('parsererror');
       if (parserError.length > 0) {
         throw new Error('Invalid XML');
       }
 
-      // Serialize without formatting
       const serializer = new XMLSerializer();
       return serializer.serializeToString(xmlDoc)
-        .replace(/>\s+</g, '><') // Remove whitespace between tags
-        .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+        .replace(/>\s+</g, '><')
+        .replace(/\s+/g, ' ')
         .trim();
     } catch (e) {
       return 'Error: Invalid XML input';

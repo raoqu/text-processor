@@ -3,6 +3,7 @@ import { reverseText, removeSpaces, countWords } from './textManipulation';
 import { base64Encode, base64Decode } from './base64Processors';
 import { urlEncode, urlDecode } from './urlProcessors';
 import { jsonFormat, jsonMinify, xmlFormat, xmlMinify } from './formatProcessors';
+import { timestampToTime, timeToTimestamp } from './timeProcessors';
 
 // Text processors collection
 export const processors = {
@@ -11,6 +12,9 @@ export const processors = {
   jsonMinify,
   xmlFormat,
   xmlMinify,
+  // Time converters
+  timestampToTime,
+  timeToTimestamp,
   // Encodings
   urlEncode,
   urlDecode,
@@ -19,11 +23,8 @@ export const processors = {
   // Case conversion
   uppercase,
   lowercase,
-  
   // Text manipulation
   reverseText,
   removeSpaces,
   countWords,
-  
-  
 };
