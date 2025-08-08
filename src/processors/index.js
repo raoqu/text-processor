@@ -2,6 +2,7 @@ import { uppercase, lowercase } from './caseConverters';
 import { reverseText, removeSpaces, countWords } from './textManipulation';
 import { base64Encode, base64Decode } from './base64Processors';
 import { urlEncode, urlDecode } from './urlProcessors';
+import { blogImageConvertor } from './blobImageProcessors';
 import { jsonFormat, jsonMinify, xmlFormat, xmlMinify } from './formatProcessors';
 import { timestampToTime, timeToTimestamp } from './timeProcessors';
 
@@ -27,4 +28,6 @@ export const processors = {
   reverseText,
   removeSpaces,
   countWords,
+  // Blob image processors
+  blogImageConvertor,
 };

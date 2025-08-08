@@ -9,10 +9,10 @@ export const timestampToTime = {
       }
 
       // Create a date object in UTC
-      const date = new Date(timestamp * 1000);
+      const gmt8Date = new Date(timestamp * 1000);
       
       // Convert to GMT+8
-      const gmt8Date = new Date(date.getTime() + (8 * 60 * 60 * 1000));
+      // const gmt8Date = new Date(date.getTime() + (0 * 60 * 60 * 1000));
       
       // Format the date
       const year = gmt8Date.getUTCFullYear();
