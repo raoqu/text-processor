@@ -5,6 +5,7 @@ import { urlEncode, urlDecode } from './urlProcessors';
 import { blogImageConvertor } from './blobImageProcessors';
 import { jsonFormat, jsonMinify, xmlFormat, xmlMinify } from './formatProcessors';
 import { timestampToTime, timeToTimestamp } from './timeProcessors';
+import { timeHexEncode } from './timeHexProcessor';
 
 // Text processors collection
 export const processors = {
@@ -30,4 +31,6 @@ export const processors = {
   countWords,
   // Blob image processors
   blogImageConvertor,
+  // Time processors
+  timeHexEncode,
 };
