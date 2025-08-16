@@ -3,7 +3,13 @@ import { processors } from '../processors';
 
 export function Sidebar({ onProcessorSelect, selectedProcessor }) {
   return (
-    <div style={{ width: '200px', padding: '1rem', borderRight: '1px solid #eee' }}>
+    <div style={{ 
+      width: '200px', 
+      padding: '1rem', 
+      borderRight: '1px solid #eee',
+      height: '100%',
+      overflowY: 'auto'
+    }}>
       {Object.entries(processors).map(([key, processor]) => (
         <NavLink
           key={key}
